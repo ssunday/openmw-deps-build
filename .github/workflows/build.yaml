@@ -9,15 +9,14 @@ env:
   VCPKG_REVISION: 6d332a018c433fad20822ff4b536e4ccdc3413bd
 
 jobs:
-  macos:
+  linux:
     strategy:
       fail-fast: true
       matrix:
         args:
-          - triplet: arm64-osx-dynamic
-            runner_image: macos-15
-          - triplet: x64-osx-dynamic
-            runner_image: macos-15-intel
+          - triplet: x64-linux
+            runner_image: ubuntu-24.04
+
     runs-on: ${{ matrix.args.runner_image }}
     name: ${{ matrix.args.triplet }}
     steps:
@@ -29,10 +28,6 @@ jobs:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-
-      - run: brew install autoconf autoconf-archive automake
-      - run: brew install nasm
-        if: ${{ matrix.args.triplet == 'x64-osx-dynamic' }}
 
       - uses: ./.github/actions/vcpkg-setup
 
@@ -50,106 +45,148 @@ jobs:
           name: vcpkg-${{ matrix.args.triplet }}-${{ github.sha }}
           path: ${{ github.workspace }}/vcpkg-${{ matrix.args.triplet }}-${{ github.sha }}.7z
 
-  windows:
-    strategy:
-      fail-fast: true
-      matrix:
-        args:
-          - triplet: x64-windows-static
-            runner_image: windows-2022
-            identifier: x64-windows-2022-static
-            host_triplet: x64-windows-static
+  # macos:
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       args:
+  #         - triplet: arm64-osx-dynamic
+  #           runner_image: macos-15
+  #         - triplet: x64-osx-dynamic
+  #           runner_image: macos-15-intel
+  #   runs-on: ${{ matrix.args.runner_image }}
+  #   name: ${{ matrix.args.triplet }}
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-          - triplet: arm64-windows-static-md
-            runner_image: windows-2022
-            identifier: arm64-windows-2022-static
-            host_triplet: x64-windows-static
+  #     - name: Export GitHub Actions cache environment variables
+  #       uses: actions/github-script@v6
+  #       with:
+  #         script: |
+  #           core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+  #           core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
-          - triplet: x64-windows
-            runner_image: windows-2022
-            identifier: x64-windows-2022
-            host_triplet: x64-windows
-            store_symbols: true
+  #     - run: brew install autoconf autoconf-archive automake
+  #     - run: brew install nasm
+  #       if: ${{ matrix.args.triplet == 'x64-osx-dynamic' }}
 
-          - triplet: arm64-windows
-            runner_image: windows-2022
-            identifier: arm64-windows-2022
-            host_triplet: x64-windows
-            store_symbols: true
+  #     - uses: ./.github/actions/vcpkg-setup
 
-    name: ${{ matrix.args.identifier }}
+  #     - name: Install vcpkg packages
+  #       run: vcpkg install --overlay-ports=ports --overlay-triplets=triplets --triplet ${{ matrix.args.triplet }} --host-triplet ${{ matrix.args.triplet }}
 
-    runs-on: ${{ matrix.args.runner_image }}
+  #     - uses: ./.github/actions/vcpkg-export
+  #       with:
+  #         output-name: vcpkg-${{ matrix.args.triplet }}-${{ github.sha }}
+  #         export-type: 7zip
 
-    steps:
-    - uses: actions/checkout@v4
+  #     - name: Store exported vcpkg packages
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: vcpkg-${{ matrix.args.triplet }}-${{ github.sha }}
+  #         path: ${{ github.workspace }}/vcpkg-${{ matrix.args.triplet }}-${{ github.sha }}.7z
 
-    - name: Export GitHub Actions cache environment variables
-      uses: actions/github-script@v6
-      with:
-        script: |
-          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+  # windows:
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       args:
+  #         - triplet: x64-windows-static
+  #           runner_image: windows-2022
+  #           identifier: x64-windows-2022-static
+  #           host_triplet: x64-windows-static
 
-    - uses: ./.github/actions/vcpkg-setup
+  #         - triplet: arm64-windows-static-md
+  #           runner_image: windows-2022
+  #           identifier: arm64-windows-2022-static
+  #           host_triplet: x64-windows-static
 
-    - name: Install vcpkg packages
-      run: >
-        vcpkg install --overlay-ports=ports --overlay-triplets=triplets --host-triplet ${{ matrix.args.host_triplet }} --triplet ${{ matrix.args.triplet }}
+  #         - triplet: x64-windows
+  #           runner_image: windows-2022
+  #           identifier: x64-windows-2022
+  #           host_triplet: x64-windows
+  #           store_symbols: true
 
-    - uses: ./.github/actions/vcpkg-export
-      with:
-        output-name: intermediate
-        export-type: raw
+  #         - triplet: arm64-windows
+  #           runner_image: windows-2022
+  #           identifier: arm64-windows-2022
+  #           host_triplet: x64-windows
+  #           store_symbols: true
 
-    - name: Move pdb files
-      working-directory: '${{ github.workspace }}/intermediate'
-      run: |
-        robocopy installed pdb/installed *.pdb /S /MOVE
-        if ($lastexitcode -lt 8) {
-          $global:LASTEXITCODE = $null
-        }
+  #   name: ${{ matrix.args.identifier }}
 
-    - name: Archive pdb files
-      working-directory: '${{ github.workspace }}/intermediate/pdb'
-      run: 7z a "${{ github.workspace }}/vcpkg-${{ matrix.args.identifier }}-pdb-${{ github.sha }}.7z" installed
+  #   runs-on: ${{ matrix.args.runner_image }}
 
-    - name: Store archived pdb files
-      uses: actions/upload-artifact@v4
-      with:
-        name: vcpkg-${{ matrix.args.identifier }}-pdb-${{ github.sha }}
-        path: ${{ github.workspace }}/vcpkg-${{ matrix.args.identifier }}-pdb-${{ github.sha }}.7z
+  #   steps:
+  #   - uses: actions/checkout@v4
 
-    - name: Archive everything else
-      working-directory: '${{ github.workspace }}/intermediate'
-      run: 7z a "${{ github.workspace }}/vcpkg-${{ matrix.args.identifier }}-${{ github.sha }}.7z" * -x!pdb
+  #   - name: Export GitHub Actions cache environment variables
+  #     uses: actions/github-script@v6
+  #     with:
+  #       script: |
+  #         core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+  #         core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
-    - name: Store exported vcpkg packages
-      uses: actions/upload-artifact@v4
-      with:
-        name: vcpkg-${{ matrix.args.identifier }}-${{ github.sha }}
-        path: ${{ github.workspace }}/vcpkg-${{ matrix.args.identifier }}-${{ github.sha }}.7z
+  #   - uses: ./.github/actions/vcpkg-setup
 
-    - name: Repackage binaries for symbol server
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      if: ${{ matrix.args.store_symbols && env.AWS_ACCESS_KEY_ID != '' && env.AWS_SECRET_ACCESS_KEY != '' }}
-      run: .\Store-Symbols.ps1 ${{ github.workspace }}\intermediate
+  #   - name: Install vcpkg packages
+  #     run: >
+  #       vcpkg install --overlay-ports=ports --overlay-triplets=triplets --host-triplet ${{ matrix.args.host_triplet }} --triplet ${{ matrix.args.triplet }}
 
-    - name: Upload symbols to symbol server
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: eu-west-3
-      if: ${{ matrix.args.store_symbols && env.AWS_ACCESS_KEY_ID != '' && env.AWS_SECRET_ACCESS_KEY != '' }}
-      working-directory: ${{ github.workspace }}/SymStore
-      run: aws --endpoint-url https://rgw.ctrl-c.liu.se s3 sync --size-only --exclude * --include *.dl_ --include *.pd_ . s3://openmw-sym
+  #   - uses: ./.github/actions/vcpkg-export
+  #     with:
+  #       output-name: intermediate
+  #       export-type: raw
+
+  #   - name: Move pdb files
+  #     working-directory: '${{ github.workspace }}/intermediate'
+  #     run: |
+  #       robocopy installed pdb/installed *.pdb /S /MOVE
+  #       if ($lastexitcode -lt 8) {
+  #         $global:LASTEXITCODE = $null
+  #       }
+
+  #   - name: Archive pdb files
+  #     working-directory: '${{ github.workspace }}/intermediate/pdb'
+  #     run: 7z a "${{ github.workspace }}/vcpkg-${{ matrix.args.identifier }}-pdb-${{ github.sha }}.7z" installed
+
+  #   - name: Store archived pdb files
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: vcpkg-${{ matrix.args.identifier }}-pdb-${{ github.sha }}
+  #       path: ${{ github.workspace }}/vcpkg-${{ matrix.args.identifier }}-pdb-${{ github.sha }}.7z
+
+  #   - name: Archive everything else
+  #     working-directory: '${{ github.workspace }}/intermediate'
+  #     run: 7z a "${{ github.workspace }}/vcpkg-${{ matrix.args.identifier }}-${{ github.sha }}.7z" * -x!pdb
+
+  #   - name: Store exported vcpkg packages
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: vcpkg-${{ matrix.args.identifier }}-${{ github.sha }}
+  #       path: ${{ github.workspace }}/vcpkg-${{ matrix.args.identifier }}-${{ github.sha }}.7z
+
+  #   - name: Repackage binaries for symbol server
+  #     env:
+  #       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #     if: ${{ matrix.args.store_symbols && env.AWS_ACCESS_KEY_ID != '' && env.AWS_SECRET_ACCESS_KEY != '' }}
+  #     run: .\Store-Symbols.ps1 ${{ github.workspace }}\intermediate
+
+  #   - name: Upload symbols to symbol server
+  #     env:
+  #       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       AWS_DEFAULT_REGION: eu-west-3
+  #     if: ${{ matrix.args.store_symbols && env.AWS_ACCESS_KEY_ID != '' && env.AWS_SECRET_ACCESS_KEY != '' }}
+  #     working-directory: ${{ github.workspace }}/SymStore
+  #     run: aws --endpoint-url https://rgw.ctrl-c.liu.se s3 sync --size-only --exclude * --include *.dl_ --include *.pd_ . s3://openmw-sym
 
   upload-deps:
     needs:
-      - windows
-      - macos
+      # - windows
+      # - macos
+      - linux
 
     runs-on: ubuntu-latest
 
@@ -180,6 +217,7 @@ jobs:
         mv vcpkg-arm64-windows-2022-pdb-${{ github.sha }}/vcpkg-arm64-windows-2022-pdb-${{ github.sha }}.7z vcpkg-arm64-windows-2022-pdb-${{ env.file }}.7z
         mv vcpkg-arm64-osx-dynamic-${{ github.sha }}/vcpkg-arm64-osx-dynamic-${{ github.sha }}.7z vcpkg-arm64-osx-dynamic-${{ env.file }}.7z
         mv vcpkg-x64-osx-dynamic-${{ github.sha }}/vcpkg-x64-osx-dynamic-${{ github.sha }}.7z vcpkg-x64-osx-dynamic-${{ env.file }}.7z
+        mv vcpkg-x64-linux-${{ github.sha }}/vcpkg-x64-linux-${{ github.sha }}.7z vcpkg-x64-linux{{ env.file }}.7z
 
     - name: Release
       if: startsWith(github.ref, 'refs/tags/')
@@ -251,6 +289,11 @@ jobs:
         file-pattern: vcpkg-*-osx-dynamic-${{ env.file }}
         subdirectory: macos
 
+    - uses: ./.github/actions/manifest-setup
+      with:
+        file-pattern: vcpkg-*-linux-${{ env.file }}
+        subdirectory: linux
+
     - name: Generate commit message
       env:
         GH_TOKEN: ${{ github.token }}
@@ -269,6 +312,7 @@ jobs:
         git checkout -b vcpkg-${{ github.sha }}
         git add windows/vcpkg-*-manifest.txt
         git add macos/vcpkg-*-manifest.txt
+        git add linux/vcpkg-*-manifest.txt
         git commit -F commit_message.txt
 
     - name: Verify commit to openmw-deps repository
