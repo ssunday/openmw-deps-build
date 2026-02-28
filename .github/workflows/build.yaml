@@ -22,7 +22,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt update
-      - run: sudo apt install -y autoconf-archive libgl-dev libltdl-dev nasm
+      - run: >
+          sudo apt install -y
+          autoconf-archive
+          libgl-dev
+          libltdl-dev
+          libibus-1.0-dev
+          libegl1-mesa-dev
+          libx11-dev
+          libxft-dev
+          libxext-dev
+          libxkbcommon-dev
+          libwayland-dev
+          nasm
 
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
