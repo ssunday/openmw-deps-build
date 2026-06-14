@@ -29,6 +29,7 @@
     {
       "name": "unshield",
       "platform": "osx"
-    }
+    },
+    "yaml-cpp"
   ]
 }
