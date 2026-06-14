@@ -1,9 +1,9 @@
 {
   "name": "openmw-mygui-osx",
-  "version": "3.4.3",
+  "version-date": "2026-06-14",
   "description": "MyGUI patched/setup for Openmw on OSX",
   "port-version": 1,
-  "homepage": "https://github.com/MyGUI/mygui",
+  "homepage": "https://github.com/ssunday/mygui",
   "dependencies": [
     {
       "name": "vcpkg-cmake",
