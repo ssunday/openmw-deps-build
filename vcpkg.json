@@ -15,15 +15,8 @@
     "icu",
     "luajit",
     "lz4",
-    {
-      "name": "mygui",
-      "platform": "!osx"
-    },
+    "mygui",
     "openal-soft",
-    {
-      "name": "openmw-mygui-osx",
-      "platform": "osx"
-    },
     "openmw-osg",
     "sdl2",
     {
