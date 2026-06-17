@@ -15,7 +15,12 @@
     "icu",
     "luajit",
     "lz4",
-    "mygui",
+    {
+      "name": "mygui",
+      "features": [
+        "msdf"
+      ]
+    },
     "openal-soft",
     "openmw-osg",
     "sdl2",
