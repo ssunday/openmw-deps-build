@@ -16,6 +16,13 @@
     "luajit",
     "lz4",
     {
+      "name": "msdfgen",
+      "default-features": false,
+      "features": [
+        "extensions"
+      ]
+    },
+    {
       "name": "mygui",
       "features": [
         "msdf"
