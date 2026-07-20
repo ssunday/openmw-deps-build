@@ -24,6 +24,7 @@
     },
     {
       "name": "mygui",
+      "version>=": "3.5.0",
       "features": [
         "msdf"
       ]
@@ -34,6 +35,13 @@
     {
       "name": "unshield",
       "platform": "osx"
+    }
+  ],
+  "builtin-baseline": "5b2dddbc4d85e4abee1f7b7ac02cb527440d645f",
+  "overrides": [
+    {
+      "name": "mygui",
+      "version": "3.5.0"
     }
   ]
 }
