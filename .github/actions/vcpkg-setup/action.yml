@@ -10,7 +10,6 @@ runs:
       if: ${{ inputs.install-vcpkg }}
     - run: |
         cd $VCPKG_INSTALLATION_ROOT
-        git remote set-url origin https://github.com/ssunday/vcpkg.git
         git fetch
         git reset --hard ${{ env.VCPKG_REVISION }}
         ./bootstrap-vcpkg.sh -disableMetrics
