@@ -1,0 +1,23 @@
+From a7bc57f99fb857bfdc949ad7e24d87b5f3d10e62 Mon Sep 17 00:00:00 2001
+From: Duron27 <duron27@gmail.com>
+Date: Tue, 14 Jul 2026 00:18:48 -0400
+Subject: [PATCH] Add support for GLES3 dynamic loading
+
+Fix error with handle being undefined when using GLES3
+---
+ src/osg/GLExtensions.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/osg/GLExtensions.cpp b/src/osg/GLExtensions.cpp
+index 5ecf63a5e5f..357796b17cb 100644
+--- a/src/osg/GLExtensions.cpp
++++ b/src/osg/GLExtensions.cpp
+@@ -335,6 +335,8 @@ OSG_INIT_SINGLETON_PROXY(GLExtensionDisableStringInitializationProxy, osg::getGL
+             static void *handle = dlopen("libGLESv1_CM.so", RTLD_NOW);
+         #elif defined(OSG_GLES2_AVAILABLE)
+             static void *handle = dlopen("libGLESv2.so", RTLD_NOW);
++        #elif defined(OSG_GLES3_AVAILABLE)
++            static void *handle = dlopen("libGLESv3.so", RTLD_NOW);
+         #elif defined(OSG_GL1_AVAILABLE)
+             static void *handle = dlopen("libGL.so", RTLD_NOW);
+         #endif

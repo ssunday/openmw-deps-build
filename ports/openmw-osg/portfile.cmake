@@ -5,10 +5,24 @@ set(OSG_VER 3.6.5)
 set(PATCHES "")
 
 if(VCPKG_TARGET_IS_OSX)
-  list(
-    APPEND PATCHES
-    "macos-dedicated-image-plugin.patch"
-  )
+    list(
+      APPEND PATCHES
+      "macos-dedicated-image-plugin.patch"
+    )
+elseif(VCPKG_TARGET_IS_ANDROID)
+    list(
+      APPEND PATCHES
+      "android/disable-polygon-offset.patch"
+      "android/fix-freetype-include-dirs.patch"
+      "android/0001-Replace-Atomic-impl-with-std-atomic.patch"
+      "android/0002-BufferObject-make-numClients-atomic.patch"
+      "android/0004-IncrementalCompileOperation-wrap-some-stuff-in-atomi.patch"
+      "android/force-add-plugins.patch"
+      "android/dae_collada.patch"
+      "android/GLES3.patch"
+      "android/custom-uniforms-for-fog-and-materials.patch"
+      "android/0005-CullSettings-make-inheritanceMask-atomic-to-silence.patch"
+    )
 endif()
 
 vcpkg_from_github(
@@ -42,18 +56,33 @@ elseif(VCPKG_TARGET_IS_WINDOWS)
     -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON
   )
 elseif(VCPKG_TARGET_IS_OSX)
-  list(
-    APPEND OPTIONS
+  list(APPEND OPTIONS
     -DOSG_WINDOWING_SYSTEM=Cocoa
   )
+elseif(VCPKG_TARGET_IS_ANDROID)
+  set(OSG_DYNAMIC OFF)
+  list(APPEND OPTIONS
+    -DOSG_CPP_EXCEPTIONS_AVAILABLE=TRUE
+    -DOSG_GLU_AVAILABLE=OFF
+    -DOSG_GL1_AVAILABLE=OFF
+    -DOSG_GL2_AVAILABLE=OFF
+    -DOSG_GL3_AVAILABLE=OFF
+    -DOSG_GLES1_AVAILABLE=OFF
+    -DOSG_GLES2_AVAILABLE=OFF
+    -DOSG_GLES3_AVAILABLE=ON
+    )
 elseif(VCPKG_CROSSCOMPILING)
     message(WARNING "Atomics detection may fail for cross builds. You can set osg cmake variables in a custom triplet.")
 endif()
 
 # The package osg can be configured to use different OpenGL profiles via a custom triplet file:
-# Possible values are GLCORE, GL2, GL3, GLES1, GLES2, GLES3, and GLES2+GLES3
+# Possible values are GLCORE, GL2, GL3, GLES1, GLES2, GLES3, and GLES2+GLES
 if(NOT DEFINED osg_OPENGL_PROFILE)
-    set(osg_OPENGL_PROFILE "GL2")
+    if(VCPKG_TARGET_IS_ANDROID)
+      set(osg_OPENGL_PROFILE "GLES3")
+    else()
+      set(osg_OPENGL_PROFILE "GL2")
+    endif()
 endif()
 
 vcpkg_cmake_configure(
