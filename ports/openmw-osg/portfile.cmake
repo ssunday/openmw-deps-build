@@ -76,7 +76,7 @@ elseif(VCPKG_CROSSCOMPILING)
 endif()
 
 # The package osg can be configured to use different OpenGL profiles via a custom triplet file:
-# Possible values are GLCORE, GL2, GL3, GLES1, GLES2, GLES3, and GLES2+GLES
+# Possible values are GLCORE, GL2, GL3, GLES1, GLES2, GLES3, and GLES2+GLES3
 if(NOT DEFINED osg_OPENGL_PROFILE)
     if(VCPKG_TARGET_IS_ANDROID)
       set(osg_OPENGL_PROFILE "GLES3")
