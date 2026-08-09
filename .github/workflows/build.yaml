@@ -30,7 +30,7 @@ jobs:
       - uses: ./.github/actions/vcpkg-setup
 
       - name: Install vcpkg packages
-        run: vcpkg install --overlay-ports=ports --overlay-triplets=triplets --triplet ${{ matrix.triplet }} --host-triplet ${{ matrix.triplet }}
+        run: vcpkg install --overlay-ports=ports --overlay-triplets=triplets --triplet ${{ matrix.triplet }}
 
       - uses: ./.github/actions/vcpkg-export
         with:
