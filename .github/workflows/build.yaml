@@ -15,18 +15,26 @@ jobs:
       matrix:
         args:
           - triplet: arm64-android
-            runner_image: ubuntu-24.04-arm
+            runner_image: ubuntu-24.04
 
     runs-on: ${{ matrix.args.runner_image }}
     name: ${{ matrix.args.triplet }}
+    env:
+      ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
         with:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - run: |
+          NDK_VERSION=r27d
+          curl -fsSL -o ndk.zip https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip
+          unzip -q ndk.zip
+          mv android-ndk-${NDK_VERSION} ${{ env.ANDROID_NDK_HOME }}
 
       - uses: ./.github/actions/vcpkg-setup
 
