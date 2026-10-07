@@ -26,7 +26,8 @@
     "openmw-osg",
     {
       "name": "sdl2",
-      "platform": "!linux"
+      "platform": "!linux",
+      "features": ["vulkan"]
     },
     {
       "name": "sdl2",
@@ -34,6 +35,7 @@
       "platform": "linux",
       "features": [
         "dbus",
+        "vulkan",
         "x11",
         "wayland"
       ]
