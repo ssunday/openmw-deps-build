@@ -13,7 +13,6 @@
     "ffmpeg",
     "freetype",
     "icu",
-    "luajit",
     "lz4",
     {
       "name": "mygui",
@@ -42,6 +41,7 @@
     {
       "name": "unshield",
       "platform": "osx|linux"
-    }
+    },
+    "vulkan-sdk-components"
   ]
 }
