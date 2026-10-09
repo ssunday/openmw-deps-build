@@ -25,20 +25,7 @@
       "platform": "osx"
     },
     "openmw-osg",
-    {
-      "name": "sdl2",
-      "platform": "!linux"
-    },
-    {
-      "name": "sdl2",
-      "default-features": false,
-      "platform": "linux",
-      "features": [
-        "dbus",
-        "x11",
-        "wayland"
-      ]
-    },
+    "sdl3",
     {
       "name": "unshield",
       "platform": "osx|linux"
