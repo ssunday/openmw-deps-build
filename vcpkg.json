@@ -24,7 +24,7 @@
     },
     {
       "name": "mygui",
-      "version>=": "3.5.3",
+      "version>=": "3.5.4",
       "features": [
         "msdf"
       ]
@@ -50,11 +50,11 @@
       "platform": "osx|linux"
     }
   ],
-  "builtin-baseline": "a5f736224e85b32e25a8ffc52562333180396642",
+  "builtin-baseline": "d805066cedcf6b13c2934832028723ea21e9477e",
   "overrides": [
     {
       "name": "mygui",
-      "version": "3.5.3"
+      "version": "3.5.4"
     }
   ]
 }

@@ -5,12 +5,13 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - run: git clone https://github.com/microsoft/vcpkg.git "$VCPKG_INSTALLATION_ROOT"
+    - run: git clone https://github.com/ssunday/vcpkg.git "$VCPKG_INSTALLATION_ROOT"
       shell: bash
       if: ${{ inputs.install-vcpkg }}
     - run: |
         cd $VCPKG_INSTALLATION_ROOT
-        git fetch
+        git remote add ssunday https://github.com/ssunday/vcpkg.git
+        git fetch ssunday
         git reset --hard ${{ env.VCPKG_REVISION }}
         ./bootstrap-vcpkg.sh -disableMetrics
       shell: bash
